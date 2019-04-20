@@ -16,17 +16,28 @@
  * 0 0 0 0 1 A A A      
  * Read max echo limit for channel A A A
  * 
+ * 0 0 0 1 0 0 [ 0 0 = NVRAM -> current  ]
+ *             [ 0 1 = default -> MVRAM  ]
+ *             [ 1 0 = default -> current]
+ *             [ 1 1 = current -> NVRAM  ]
+ * Manage current and NVRAM configuration for channel A A A
+ * 
+ * 0 0 0 1 0 1 x x 
+ * Reboot device
+ * 
+ * 0 0 0 1 1 0 x x 
+ * 0 0 0 1 1 1 x x
+ * Undefined
+ * 
  * 0 0 1 [0=min/1=max] [0=read/1=reset] A A A
  * Read/reset min/max distance read for channel A A A
  * 
  * 0 1 0 [0=disable/1=enable] [0=read/1=write] A A A
  * Get/set enable/disable status for channel A A A
  * 
- * 0 1 1    [ 0 0 = NVRAM -> current  ] A A A
- *          [ 0 1 = default -> MVRAM  ]
- *          [ 1 0 = default -> current]
- *          [ 1 1 = current -> NVRAM  ]
- * Manage current and NVRAM configuration for channel A A A
+ * 0 1 1 b5 b4 b3 b2 b1
+ * Set i2c address to 0 1 b5 b4 b3 b2 b1 0
+ * (40, 42, ... 7E)
  * 
  * 1 [ X X X X ] [ A A A ]
  * Write max echo limit for channel A A A
@@ -69,17 +80,20 @@ extern "C" {
 
 #define CMD_READ_DISTANCE   0
 #define CMD_READ_ECHOLIMIT  1
-#define CMD_UNDEF_02        2
-#define CMD_UNDEF_03        3
-#define CMD_MIN_MAX         4
-#define CMD_ENABLE          5
-#define CMD_CONFIG          6
-#define CMD_ECHO_LIM_WRITE  7
+#define CMD_CONFIG          2
+#define CMD_RESET           3
+#define CMD_UNDEF_04        4
+#define CMD_UNDEF_05        5
+#define CMD_MIN_MAX         6
+#define CMD_ENABLE          7
+#define CMD_I2C_ADDR        8
+#define CMD_ECHO_LIM_WRITE  9
 
 typedef union config {
     struct {
+        volatile uint16_t i2dAddr;
+        volatile uint16_t enabled;
         volatile uint16_t maxEchoLimit[8];
-        volatile uint16_t enabled[8];
     } cfg;
     uint16_t dummy[WRITE_FLASH_BLOCKSIZE];
 } config_t;
@@ -94,6 +108,8 @@ void readResetMinMaxStats(uint8_t channel, uint8_t dataByte);
 void enableDisable(uint8_t channel, uint8_t dataByte);
 void manageConfig(uint8_t channel, uint8_t dataByte);
 void setEchoLimit(uint8_t channel, uint8_t dataByte);
+void setI2CAddr(uint8_t channel, uint8_t dataByte);
+void reboot(uint8_t channel, uint8_t dataByte);
 void mySlaveWriteHandler(void);
 
 #ifdef	__cplusplus

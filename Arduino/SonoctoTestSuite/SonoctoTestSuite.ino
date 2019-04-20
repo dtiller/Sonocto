@@ -38,18 +38,18 @@ void testInitConfigFromDefaults(void) {
     Sonocto.setEchoLimit(ADDR, i, i);
     Sonocto.disableChannel(ADDR, i);
     uint16_t value = Sonocto.getEchoLimit(ADDR, i);
-    test("channel echoLimit incorrect", value == i);
+    test("Step 1 channel echoLimit incorrect", value == i);
     value = Sonocto.getEnabled(ADDR, i);
-    test("channel should be disabled", value == 0);
+    test("Step 1 channel should be disabled", value == 0);
   }
 
   Sonocto.initializeConfigFromDefaults(ADDR);
 
   for (int i = 0; i < 8; i++) {
     uint16_t value = Sonocto.getEchoLimit(ADDR, i);
-    test("channel echoLimit incorrect", value == 0x0f);
+    test("Step 2 channel echoLimit incorrect", value == 0x0f);
     value = Sonocto.getEnabled(ADDR, i);
-    test("channel should be enabled", value == 1);
+    test("Step 2 channel should be enabled", value == 1);
   }
 }
 
@@ -141,19 +141,28 @@ void testMinMaxDistance() {
   test("Min value incorrect", value == dist);
 }
 
+void testReboot() {
+  Sonocto.reboot(ADDR);
+}
+
 void setup() {
   Sonocto.begin(400000);
   Serial.begin(115200);
+
+  Serial.println("Testing reboot ONCE. Watch for alternating lights.");
+  testReboot();
+  delay(5000);
+  Serial.println("Testing NVRAM ONCE.");
+  testNVRAM();
 }
   
 void loop() {
     testEnableDisableChannel();
     testGetSetMaxEcho();
     testInitConfigFromDefaults();
-    testNVRAM();
+    //testNVRAM();
     testDisabledChannelReturnValue();
     testGetDistance();
     testMinMaxDistance();
     delay(2000);
-//  }
 }

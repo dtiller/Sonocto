@@ -58,8 +58,9 @@ const uint16_t SAF_ADDR = END_FLASH - CONFIG_SIZE;
 config_t config;
 
 void initializeConfig(config_t *cfg) {
+    cfg->cfg.i2dAddr = 0x08;
+    cfg->cfg.enabled = 0xff;
     for (uint8_t i = 0; i < 8; i++) {
-        cfg->cfg.enabled[i] = 1;
         cfg->cfg.maxEchoLimit[i] = 0x0f;
     }
 }
@@ -90,11 +91,13 @@ void mySlaveReadHandler(void) {
     uint8_t command;
     if (dataByte & 0x80) {
         command = CMD_ECHO_LIM_WRITE;
-    } else if ((dataByte & 0xe0) == 0) {
-        // 5 bit command
-        command = (dataByte >> 3) & 0x03;
+    } else if ((dataByte & 0xf0) == 0) {
+        // 5 bit command + channel
+        command = (dataByte >> 3) & 0x01;
+    } else if ((dataByte & 0xf0) == 0x10) {
+        command = ((dataByte >> 2) & 0x03) + 2;
     } else {
-        command = ((dataByte >> 5) & 0x03) + 3;
+        command = ((dataByte >> 5) & 0x03) + 5;
     }
     
     switch (command) {
@@ -116,8 +119,14 @@ void mySlaveReadHandler(void) {
         case CMD_ECHO_LIM_WRITE:
             setEchoLimit(channel, dataByte);
             break;
-        case CMD_UNDEF_02:
-        case CMD_UNDEF_03:
+        case CMD_I2C_ADDR:
+            setI2CAddr(channel, dataByte);
+            break;
+        case CMD_RESET:
+            reboot(channel, dataByte);
+            break;
+        case CMD_UNDEF_04:
+        case CMD_UNDEF_05:
         default:
             timerValue = UNKNOWN_CMD;
             break;          
@@ -128,7 +137,7 @@ void mySlaveReadHandler(void) {
 void readDistance(uint8_t channel) {
     // Set Up mux/demux
     //LATC = (LATC & 0xc7) | value;
-    if (config.cfg.enabled[channel] == 0) {
+    if ((config.cfg.enabled & (1 << channel)) == 0) {
         timerValue = CHANNEL_DISABLED;
         return;
     }
@@ -142,7 +151,6 @@ void readDistance(uint8_t channel) {
     }
     
     TMR1_WriteTimer(0x0000);
-    //TMR0_WriteTimer(0x0000);
     TMR0_WriteTimer(0xFFFF - ((config.cfg.maxEchoLimit[channel] + 1) << 10) + 1);
     TMR0_StartTimer();
     TMR1_StartTimer();
@@ -213,20 +221,21 @@ void readResetMinMaxStats(uint8_t channel, uint8_t dataByte) {
 // [ 0 1 0 ] [ 0 = disable 1 = enable] [ 0 = read 1 = write ] [ A A A ]
 void enableDisable(uint8_t channel, uint8_t dataByte) {
     // Always return the previous value
-    timerValue = config.cfg.enabled[channel];
+    timerValue = (config.cfg.enabled >> channel) & 0x01;
     if (dataByte & 0x08) {
-        config.cfg.enabled[channel] = (dataByte >> 4) & 0x01;
+        config.cfg.enabled &= ~(1 << channel);
+        config.cfg.enabled |= ((dataByte >> 4) & 0x01) << channel;
     }
 }
 
-// [ 0 1 1 ] [ X Y ] [ A A A ]
+// [ 0 0 0 1 0 0 ] [ X Y ]
 // X Y Action
 // 0 0 Copy NVRAM --> current config
 // 0 1 Set NVRAM config to default values
 // 1 0 Set current config to default values
 // 1 1 Copy current config to NVRAM
 void manageConfig(uint8_t channel, uint8_t dataByte) {
-    uint8_t action = (dataByte >> 3) & 0x03;
+    uint8_t action = dataByte & 0x03;
     timerValue = 0;
     switch (action) {
         case 0:
@@ -245,6 +254,18 @@ void manageConfig(uint8_t channel, uint8_t dataByte) {
             writeNVRAM(&config);
             break;
     }
+}
+
+// [ 0 0 0 1 0 1 x x ]
+// Reboot device
+void reboot(uint8_t channel, uint8_t dataByte) {
+    RESET();
+}
+
+// [ 0 1 1 b5 b4 b3 b2 b1 ]
+// Set I2C address to 0 1 b5 b4 b3 b2 b1 0 
+void setI2CAddr(uint8_t channel, uint8_t dataByte) {
+    config.cfg.i2dAddr = 0x40 | ((dataByte & 0x1f) << 1);
 }
 
 // [ 1 ] [ X X X X ] [ A A A ]

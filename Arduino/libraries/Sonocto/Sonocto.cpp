@@ -104,3 +104,11 @@ uint16_t SonoctoClass::getDistance(uint8_t i2cAddr, uint8_t channel) {
   writeI2C(i2cAddr, channel);
   return readI2C(i2cAddr); 
 }
+
+uint16_t SonoctoClass::reboot(uint8_t i2cAddr) {
+  writeI2C(i2cAddr, REBOOT);
+}
+
+uint16_t SonoctoClass::setI2CAddr(uint8_t i2cAddr, uint8_t newAddr) {
+  writeI2C(i2cAddr, SET_I2C_ADDR | (newAddr & 0x1f));
+}

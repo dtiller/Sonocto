@@ -10,9 +10,11 @@
 #define BENCHMARK 0
 #define READ_DISTANCE 0x00
 #define READ_MAXECHO  0x08
+#define RW_CONFIG     0x10
+#define REBOOT	      0x14
 #define RW_MIN_MAX    0x20
 #define RW_ENABLE     0x40
-#define RW_CONFIG     0x60
+#define SET_I2C_ADDR  0x60
 #define WRITE_MAXECHO 0x80
 
 // Use w/ RW_MIN_MAX
@@ -25,9 +27,9 @@
 
 // Use with RW_CONFIG
 #define NV_CURRENT    0x00
-#define DEF_NV        0x08
-#define DEF_CURRENT   0x10
-#define CURRENT_NV    0x18
+#define DEF_NV        0x01
+#define DEF_CURRENT   0x02
+#define CURRENT_NV    0x03
 
 class SonoctoClass {
   public:
@@ -46,6 +48,8 @@ class SonoctoClass {
     uint16_t writeConfigToNVRAM(uint8_t i2cAddr);
     uint16_t setEchoLimit(uint8_t i2cAddr, uint8_t channel, uint16_t limit);
     uint16_t getDistance(uint8_t i2cAddr, uint8_t channel);
+    uint16_t reboot(uint8_t i2cAddr);
+    uint16_t setI2CAddr(uint8_t i2cAddr, uint8_t newAddr);
 
   private:
     void writeI2C(uint8_t i2cAddr, uint8_t value);
