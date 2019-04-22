@@ -24,7 +24,7 @@
 #include "../i2c1_driver.h"
 #include "i2c_slave.h"
 
-#define I2C1_SLAVE_ADDRESS 8 
+#define I2C1_SLAVE_ADDRESS 32 
 #define I2C1_SLAVE_MASK    127
 
 /**

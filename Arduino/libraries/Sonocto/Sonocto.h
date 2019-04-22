@@ -7,6 +7,11 @@
 
 #define DEBUG_SONAR   0
 
+// Change this _and_ the code in MPLAB-X to change the i2c addr range
+// By default it's 0x20-0x3F.
+#define I2C_UPPER_BITS	0x20
+#define DEFAULT_I2C_ADDR I2C_UPPER_BITS
+
 #define BENCHMARK 0
 #define READ_DISTANCE 0x00
 #define READ_MAXECHO  0x08

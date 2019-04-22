@@ -110,5 +110,9 @@ uint16_t SonoctoClass::reboot(uint8_t i2cAddr) {
 }
 
 uint16_t SonoctoClass::setI2CAddr(uint8_t i2cAddr, uint8_t newAddr) {
+  if (newAddr < I2C_UPPER_BITS || newAddr > I2C_UPPER_BITS + 0x1f) {
+    return 0xffff;
+  }
   writeI2C(i2cAddr, SET_I2C_ADDR | (newAddr & 0x1f));
+  return readI2C(newAddr);
 }

@@ -58,7 +58,7 @@ const uint16_t SAF_ADDR = END_FLASH - CONFIG_SIZE;
 config_t config;
 
 void initializeConfig(config_t *cfg) {
-    cfg->cfg.i2dAddr = 0x08;
+    cfg->cfg.i2cAddr = I2C_UPPER_BITS;
     cfg->cfg.enabled = 0xff;
     for (uint8_t i = 0; i < 8; i++) {
         cfg->cfg.maxEchoLimit[i] = 0x0f;
@@ -147,7 +147,16 @@ void readDistance(uint8_t channel) {
     LATCbits.LATC5 = (channel >> 2) & 0x01;
     
     if (waitForGate[channel]) {
-        while (TMR1_CheckGateValueStatus()) ;
+        TMR0_WriteTimer(0x0000);
+        TMR0_StartTimer();
+        while (!TMR0_HasOverflowOccured() && TMR1_CheckGateValueStatus()) ;
+        TMR0_StopTimer();
+        if (TMR0_HasOverflowOccured()) {
+            timerValue = GATE_TIMEOUT;
+            PIR0bits.TMR0IF = 0;
+            
+            return;
+        }
     }
     
     TMR1_WriteTimer(0x0000);
@@ -262,10 +271,12 @@ void reboot(uint8_t channel, uint8_t dataByte) {
     RESET();
 }
 
-// [ 0 1 1 b5 b4 b3 b2 b1 ]
-// Set I2C address to 0 1 b5 b4 b3 b2 b1 0 
+// [ 0 1 1 b4 b3 b2 b1 b0 ]
+// Set I2C address to 0 1 b4 b3 b2 b1 b0 
 void setI2CAddr(uint8_t channel, uint8_t dataByte) {
-    config.cfg.i2dAddr = 0x40 | ((dataByte & 0x1f) << 1);
+    timerValue = i2c1_driver_getAddr() >> 1;
+    config.cfg.i2cAddr = I2C_UPPER_BITS | (dataByte & 0x1f);
+    i2c1_driver_setAddr(config.cfg.i2cAddr << 1);
 }
 
 // [ 1 ] [ X X X X ] [ A A A ]
@@ -340,6 +351,7 @@ void main(void)
     i2c_slave_open();
     i2c_slave_setWriteIntHandler(mySlaveWriteHandler);
     i2c_slave_setReadIntHandler(mySlaveReadHandler);
+    i2c1_driver_setAddr(config.cfg.i2cAddr << 1);
     i2c1_driver_start();    // Sets SEN = 1
     mssp1_enableIRQ();      // Sets SSP1IE = 1
     

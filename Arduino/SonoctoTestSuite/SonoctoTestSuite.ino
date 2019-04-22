@@ -1,6 +1,6 @@
 #include "Sonocto.h"
 
-#define ADDR  0x08
+#define ADDR 0x21
 
 uint8_t test(char *msg, uint8_t t) {
   if (!t) {
@@ -142,7 +142,17 @@ void testMinMaxDistance() {
 }
 
 void testReboot() {
+  Serial.println("In testReboot...");
   Sonocto.reboot(ADDR);
+}
+
+void testSetI2CAddr() {
+  Serial.println("In testSetI2CAddr...");
+  uint16_t value = Sonocto.setI2CAddr(ADDR, ADDR + 1);
+  test("Old i2c ADDRess incorrect", value == ADDR);
+
+  value = Sonocto.setI2CAddr(ADDR + 1, ADDR);
+  test("New i2c ADDRess incorrect", value == ADDR + 1);
 }
 
 void setup() {
@@ -160,9 +170,9 @@ void loop() {
     testEnableDisableChannel();
     testGetSetMaxEcho();
     testInitConfigFromDefaults();
-    //testNVRAM();
     testDisabledChannelReturnValue();
     testGetDistance();
     testMinMaxDistance();
+    testSetI2CAddr();
     delay(2000);
 }

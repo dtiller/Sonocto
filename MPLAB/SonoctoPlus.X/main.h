@@ -36,8 +36,8 @@
  * Get/set enable/disable status for channel A A A
  * 
  * 0 1 1 b5 b4 b3 b2 b1
- * Set i2c address to 0 1 b5 b4 b3 b2 b1 0
- * (40, 42, ... 7E)
+ * Set i2c address to 0 1 b4 b3 b2 b1 b0
+ * (20, 21, ... 3F)
  * 
  * 1 [ X X X X ] [ A A A ]
  * Write max echo limit for channel A A A
@@ -70,6 +70,8 @@ extern "C" {
 #endif
 
 #define CONFIG_SIZE         32
+    
+#define I2C_UPPER_BITS      0x20
 
 #define READ_INDEX_EXCEEDED 0xf0
 #define NO_ECHO             0xf1f1
@@ -77,6 +79,7 @@ extern "C" {
 #define UNKNOWN_CMD         0xf3f3
 #define CHANNEL_DISABLED    0xf4f4
 #define TMR1_OVFL           0xf5f5
+#define GATE_TIMEOUT        0xf6f6
 
 #define CMD_READ_DISTANCE   0
 #define CMD_READ_ECHOLIMIT  1
@@ -91,7 +94,7 @@ extern "C" {
 
 typedef union config {
     struct {
-        volatile uint16_t i2dAddr;
+        volatile uint16_t i2cAddr;
         volatile uint16_t enabled;
         volatile uint16_t maxEchoLimit[8];
     } cfg;
