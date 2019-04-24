@@ -1,6 +1,7 @@
 #include "Sonocto.h"
 
-#define ADDR 0x21
+#define ADDR 0x20
+#define CHANNEL 0
 
 uint8_t test(char *msg, uint8_t t) {
   if (!t) {
@@ -108,8 +109,8 @@ uint16_t testGetDistance(void) {
     Sonocto.initializeConfigFromDefaults(ADDR);
     
     while (1) {
-      value = Sonocto.getDistance(ADDR, 0);
-      if (!test("Returned distance from sensor 0 should be 0-16383. Make it so.", value < 16384 && value > 0)) {
+      value = Sonocto.getDistance(ADDR, CHANNEL);
+      if (!test("Returned distance from sensor should be 0-16383. Make it so.", value < 16384 && value > 0)) {
         delay(1000);
       } else {
         break;
@@ -121,23 +122,23 @@ uint16_t testGetDistance(void) {
 
 void testMinMaxDistance() {
   Serial.println("In testMinMaxDistance...");
-  Sonocto.resetMaxValue(ADDR, 0);
-  Sonocto.resetMinValue(ADDR, 0);
+  Sonocto.resetMaxValue(ADDR, CHANNEL);
+  Sonocto.resetMinValue(ADDR, CHANNEL);
 
-  uint16_t value = Sonocto.getMaxValue(ADDR, 0);
+  uint16_t value = Sonocto.getMaxValue(ADDR, CHANNEL);
   test("Max value should be 0", value == 0);
 
-  value = Sonocto.getMinValue(ADDR, 0);
+  value = Sonocto.getMinValue(ADDR, CHANNEL);
   test("Min value should be 0xffff", value == 0xffff);
   
   // Get a reading on sensor 0
 
   uint16_t dist = testGetDistance();
   
-  value = Sonocto.getMaxValue(ADDR, 0);
+  value = Sonocto.getMaxValue(ADDR, CHANNEL);
   test("Max value incorrect", value == dist);
 
-  value = Sonocto.getMinValue(ADDR, 0);
+  value = Sonocto.getMinValue(ADDR, CHANNEL);
   test("Min value incorrect", value == dist);
 }
 
