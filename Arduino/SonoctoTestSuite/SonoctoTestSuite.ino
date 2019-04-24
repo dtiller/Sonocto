@@ -156,6 +156,19 @@ void testSetI2CAddr() {
   test("New i2c ADDRess incorrect", value == ADDR + 1);
 }
 
+void testGetDistanceMeters() {
+  Serial.println("In testGetDistanceMeters...");
+  double value = Sonocto.getDistanceMeters(ADDR, CHANNEL);
+  test("Distance in meters should be 0 < 5.57", value >= 0 && value < 5.57);
+
+}
+
+void testGetDistanceFeet() {
+  Serial.println("In testGetDistanceFeet...");
+  double value = Sonocto.getDistanceFeet(ADDR, CHANNEL);
+  test("Distance in feet should be 0 < 18.275", value >= 0 && value < 18.275);
+}
+
 void setup() {
   Sonocto.begin(400000);
   Serial.begin(115200);
@@ -173,6 +186,8 @@ void loop() {
     testInitConfigFromDefaults();
     testDisabledChannelReturnValue();
     testGetDistance();
+    testGetDistanceMeters();
+    testGetDistanceFeet();
     testMinMaxDistance();
     testSetI2CAddr();
     delay(2000);
