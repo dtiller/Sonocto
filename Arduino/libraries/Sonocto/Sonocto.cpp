@@ -1,6 +1,8 @@
 #include "Wire.h"
 #include "Sonocto.h"
 
+#define TIMER_CLOCK 500000.0
+
 void SonoctoClass::begin(int speed) {
   Wire.begin();
   Wire.setClock(speed);
@@ -103,6 +105,24 @@ uint16_t SonoctoClass::setEchoLimit(uint8_t i2cAddr, uint8_t channel, uint16_t l
 uint16_t SonoctoClass::getDistance(uint8_t i2cAddr, uint8_t channel) {
   writeI2C(i2cAddr, channel);
   return readI2C(i2cAddr); 
+}
+
+double SonoctoClass::getDistanceMeters(uint8_t i2cAddr, uint8_t channel) {
+  uint16_t value = getDistance(i2cAddr, channel);
+  if (value & 0x8000) {
+    return (double) value;
+  }
+ 
+  return 170.0 * value / TIMER_CLOCK;
+}
+
+double SonoctoClass::getDistanceFeet(uint8_t i2cAddr, uint8_t channel) {
+  uint16_t value = getDistance(i2cAddr, channel);
+  if (value & 0x8000) {
+    return (double) value;
+  }
+ 
+  return 557.74 * value / TIMER_CLOCK;
 }
 
 uint16_t SonoctoClass::reboot(uint8_t i2cAddr) {

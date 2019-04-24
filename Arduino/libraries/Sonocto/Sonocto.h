@@ -53,6 +53,8 @@ class SonoctoClass {
     uint16_t writeConfigToNVRAM(uint8_t i2cAddr);
     uint16_t setEchoLimit(uint8_t i2cAddr, uint8_t channel, uint16_t limit);
     uint16_t getDistance(uint8_t i2cAddr, uint8_t channel);
+    double SonoctoClass::getDistanceMeters(uint8_t i2cAddr, uint8_t channel);
+    double SonoctoClass::getDistanceFeet(uint8_t i2cAddr, uint8_t channel);
     uint16_t reboot(uint8_t i2cAddr);
     uint16_t setI2CAddr(uint8_t i2cAddr, uint8_t newAddr);
 
