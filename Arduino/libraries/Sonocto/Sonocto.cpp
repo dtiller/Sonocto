@@ -1,8 +1,6 @@
 #include "Wire.h"
 #include "Sonocto.h"
 
-#define TIMER_CLOCK 500000.0
-
 void SonoctoClass::begin(int speed) {
   Wire.begin();
   Wire.setClock(speed);
@@ -107,22 +105,22 @@ uint16_t SonoctoClass::getDistance(uint8_t i2cAddr, uint8_t channel) {
   return readI2C(i2cAddr); 
 }
 
-double SonoctoClass::getDistanceMeters(uint8_t i2cAddr, uint8_t channel) {
+float SonoctoClass::getDistanceMeters(uint8_t i2cAddr, uint8_t channel) {
   uint16_t value = getDistance(i2cAddr, channel);
   if (value & 0x8000) {
-    return (double) value;
+    return (float) value;
   }
  
-  return 170.0 * value / TIMER_CLOCK;
+  return SOUND_METERS_SEC_2 * value / (float) TIMER_CLOCK;
 }
 
-double SonoctoClass::getDistanceFeet(uint8_t i2cAddr, uint8_t channel) {
+float SonoctoClass::getDistanceFeet(uint8_t i2cAddr, uint8_t channel) {
   uint16_t value = getDistance(i2cAddr, channel);
   if (value & 0x8000) {
-    return (double) value;
+    return (float) value;
   }
  
-  return 557.74 * value / TIMER_CLOCK;
+  return SOUND_FEET_SEC_2 * value / (float) TIMER_CLOCK;
 }
 
 uint16_t SonoctoClass::reboot(uint8_t i2cAddr) {
@@ -135,4 +133,9 @@ uint16_t SonoctoClass::setI2CAddr(uint8_t i2cAddr, uint8_t newAddr) {
   }
   writeI2C(i2cAddr, SET_I2C_ADDR | (newAddr & 0x1f));
   return readI2C(newAddr);
+}
+
+uint16_t SonoctoClass::getVersion(uint8_t i2cAddr) {
+  writeI2C(i2cAddr, GET_VERSION);
+  return readI2C(i2cAddr);
 }

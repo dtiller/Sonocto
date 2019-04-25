@@ -5,7 +5,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#define DEBUG_SONAR   0
+#define TIMER_CLOCK             500000.0f
+#define SOUND_METERS_SEC_2      170.0f
+#define SOUND_FEET_SEC_2        557.74f
 
 // Change this _and_ the code in MPLAB-X to change the i2c addr range
 // By default it's 0x20-0x3F.
@@ -17,6 +19,7 @@
 #define READ_MAXECHO  0x08
 #define RW_CONFIG     0x10
 #define REBOOT	      0x14
+#define GET_VERSION   0x18
 #define RW_MIN_MAX    0x20
 #define RW_ENABLE     0x40
 #define SET_I2C_ADDR  0x60
@@ -53,10 +56,11 @@ class SonoctoClass {
     uint16_t writeConfigToNVRAM(uint8_t i2cAddr);
     uint16_t setEchoLimit(uint8_t i2cAddr, uint8_t channel, uint16_t limit);
     uint16_t getDistance(uint8_t i2cAddr, uint8_t channel);
-    double SonoctoClass::getDistanceMeters(uint8_t i2cAddr, uint8_t channel);
-    double SonoctoClass::getDistanceFeet(uint8_t i2cAddr, uint8_t channel);
+    float SonoctoClass::getDistanceMeters(uint8_t i2cAddr, uint8_t channel);
+    float SonoctoClass::getDistanceFeet(uint8_t i2cAddr, uint8_t channel);
     uint16_t reboot(uint8_t i2cAddr);
     uint16_t setI2CAddr(uint8_t i2cAddr, uint8_t newAddr);
+    uint16_t getVersion(uint8_t i2cAddr);
 
   private:
     void writeI2C(uint8_t i2cAddr, uint8_t value);
