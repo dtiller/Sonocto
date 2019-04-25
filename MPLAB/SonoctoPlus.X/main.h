@@ -25,7 +25,9 @@
  * 0 0 0 1 0 1 x x 
  * Reboot device
  * 
+ * Read Version
  * 0 0 0 1 1 0 x x 
+ * 
  * 0 0 0 1 1 1 x x
  * Undefined
  * 
@@ -68,6 +70,8 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
+    
+#include "version.h"
 
 #define CONFIG_SIZE         32
     
@@ -85,7 +89,7 @@ extern "C" {
 #define CMD_READ_ECHOLIMIT  1
 #define CMD_CONFIG          2
 #define CMD_RESET           3
-#define CMD_UNDEF_04        4
+#define CMD_VERSION         4
 #define CMD_UNDEF_05        5
 #define CMD_MIN_MAX         6
 #define CMD_ENABLE          7
@@ -113,6 +117,7 @@ void manageConfig(uint8_t channel, uint8_t dataByte);
 void setEchoLimit(uint8_t channel, uint8_t dataByte);
 void setI2CAddr(uint8_t channel, uint8_t dataByte);
 void reboot(uint8_t channel, uint8_t dataByte);
+void readVersion(uint8_t channel, uint8_t dataByte);
 void mySlaveWriteHandler(void);
 
 #ifdef	__cplusplus

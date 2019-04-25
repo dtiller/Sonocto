@@ -158,15 +158,23 @@ void testSetI2CAddr() {
 
 void testGetDistanceMeters() {
   Serial.println("In testGetDistanceMeters...");
-  double value = Sonocto.getDistanceMeters(ADDR, CHANNEL);
+  float value = Sonocto.getDistanceMeters(ADDR, CHANNEL);
   test("Distance in meters should be 0 < 5.57", value >= 0 && value < 5.57);
 
 }
 
 void testGetDistanceFeet() {
   Serial.println("In testGetDistanceFeet...");
-  double value = Sonocto.getDistanceFeet(ADDR, CHANNEL);
+  float value = Sonocto.getDistanceFeet(ADDR, CHANNEL);
   test("Distance in feet should be 0 < 18.275", value >= 0 && value < 18.275);
+}
+
+void testGetVersion() {
+  Serial.println("In testGetVersion...");
+  uint16_t value = Sonocto.getVersion(ADDR);
+  uint8_t upper = (value >> 8) & 0xff;
+  uint8_t lower = value & 0xff;
+  test("Version is not [1-99].[0-99]", upper > 0 && upper < 99 && lower >=0 && lower < 100);
 }
 
 void setup() {
@@ -190,5 +198,6 @@ void loop() {
     testGetDistanceFeet();
     testMinMaxDistance();
     testSetI2CAddr();
+    testGetVersion();
     delay(2000);
 }

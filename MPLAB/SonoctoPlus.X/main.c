@@ -125,7 +125,9 @@ void mySlaveReadHandler(void) {
         case CMD_RESET:
             reboot(channel, dataByte);
             break;
-        case CMD_UNDEF_04:
+        case CMD_VERSION:
+            readVersion(channel, dataByte);
+            break;
         case CMD_UNDEF_05:
         default:
             timerValue = UNKNOWN_CMD;
@@ -269,6 +271,12 @@ void manageConfig(uint8_t channel, uint8_t dataByte) {
 // Reboot device
 void reboot(uint8_t channel, uint8_t dataByte) {
     RESET();
+}
+
+// [ 0 0 0 1 1 0 x x ]
+// Read Version
+void readVersion(uint8_t channel, uint8_t dataByte) {
+    timerValue = VERSION;
 }
 
 // [ 0 1 1 b4 b3 b2 b1 b0 ]
